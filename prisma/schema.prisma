@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  SALES
+  TECHNICIAN
+}
+
+enum ClientType {
+  PRIVATE
+  BUSINESS
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum ConstructionSiteStatus {
+  PLANNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  authProviderId String    @unique
+  email          String    @unique
+  name           String?
+  role           UserRole  @default(TECHNICIAN)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  clients        Client[]
+  quotes         Quote[]
+  managedSites   ConstructionSite[]
+  siteAssignments ConstructionSiteAssignment[]
+}
+
+model Client {
+  id        String     @id @default(cuid())
+  ownerId   String
+  type      ClientType @default(PRIVATE)
+  name      String
+  email     String?
+  phone     String?
+  taxCode   String?
+  vatNumber String?
+  address   String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  owner             User               @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  quotes            Quote[]
+  constructionSites ConstructionSite[]
+
+  @@index([ownerId])
+  @@index([deletedAt])
+}
+
+model Quote {
+  id         String      @id @default(cuid())
+  clientId   String
+  createdById String
+  number     String      @unique
+  title      String
+  status     QuoteStatus @default(DRAFT)
+  subtotal   Decimal     @db.Decimal(12, 2)
+  taxRate    Decimal     @db.Decimal(5, 2)
+  taxTotal   Decimal     @db.Decimal(12, 2)
+  total      Decimal     @db.Decimal(12, 2)
+  validUntil DateTime?
+  acceptedAt DateTime?
+  rejectedAt DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+
+  client           Client             @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  createdBy        User               @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  items            QuoteItem[]
+  constructionSite ConstructionSite?
+
+  @@index([clientId])
+  @@index([createdById])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model QuoteItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  description String
+  quantity    Decimal  @db.Decimal(10, 2)
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  lineTotal   Decimal  @db.Decimal(12, 2)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
+}
+
+model ConstructionSite {
+  id        String                 @id @default(cuid())
+  clientId  String
+  quoteId   String?                @unique
+  managerId String
+  title     String
+  status    ConstructionSiteStatus @default(PLANNED)
+  startDate DateTime?
+  endDate   DateTime?
+  address   String?
+  notes     String?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  deletedAt DateTime?
+
+  client      Client                       @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  quote       Quote?                       @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  manager     User                         @relation(fields: [managerId], references: [id], onDelete: Restrict)
+  assignments ConstructionSiteAssignment[]
+
+  @@index([clientId])
+  @@index([managerId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model ConstructionSiteAssignment {
+  id                 String   @id @default(cuid())
+  constructionSiteId String
+  userId             String
+  assignedAt         DateTime @default(now())
+
+  constructionSite ConstructionSite @relation(fields: [constructionSiteId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([constructionSiteId, userId])
+  @@index([userId])
+}
