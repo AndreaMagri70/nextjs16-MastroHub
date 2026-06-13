@@ -2,6 +2,9 @@ import { QuoteForm } from "./_components/quote-form";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 
+import { acceptQuote } from "@/actions/quote-actions";
+import { Button } from "@/components/ui/button";
+
 import {
   Table,
   TableBody,
@@ -107,6 +110,7 @@ export default async function QuotesPage() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead className="text-right">Totale</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -122,12 +126,24 @@ export default async function QuotesPage() {
                         currency: "EUR",
                       })}
                     </TableCell>
+                    <TableCell className="text-right">
+                      {["DRAFT", "SENT"].includes(quote.status) ? (
+                        <form action={acceptQuote}>
+                          <input type="hidden" name="quoteId" value={quote.id} />
+                          <Button type="submit" variant="outline" size="sm">
+                            Accetta
+                          </Button>
+                        </form>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
 
                 {quotes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                       Nessun preventivo trovato.
                     </TableCell>
                   </TableRow>
