@@ -105,3 +105,66 @@ export async function createQuote(
     message: "Preventivo creato correttamente.",
   };
 }
+
+export async function acceptQuote(formData: FormData) {
+  const currentUser = await requireCurrentUser();
+
+  const quoteId = formData.get("quoteId");
+
+  if (typeof quoteId !== "string" || !quoteId) {
+    return {
+      success: false,
+      message: "Preventivo non valido.",
+    };
+  }
+
+  if (!["ADMIN", "MANAGER", "SALES"].includes(currentUser.role)) {
+    return {
+      success: false,
+      message: "Non hai i permessi per accettare preventivi.",
+    };
+  }
+
+  const quote = await prisma.quote.findFirst({
+    where: {
+      id: quoteId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (!quote) {
+    return {
+      success: false,
+      message: "Preventivo non trovato.",
+    };
+  }
+
+  if (!["DRAFT", "SENT"].includes(quote.status)) {
+    return {
+      success: false,
+      message: "Solo i preventivi in bozza o inviati possono essere accettati.",
+    };
+  }
+
+  await prisma.quote.update({
+    where: {
+      id: quote.id,
+    },
+    data: {
+      status: "ACCEPTED",
+      acceptedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/quotes");
+  revalidatePath("/construction-sites");
+
+  return {
+    success: true,
+    message: "Preventivo accettato correttamente.",
+  };
+}

@@ -4,16 +4,30 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 
-export async function signInWithEmail(formData: FormData) {
+export type AuthActionState = {
+  success: boolean;
+  message: string;
+};
+
+export async function signInWithEmail(
+  _prevState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
   const email = formData.get("email");
   const password = formData.get("password");
 
   if (typeof email !== "string" || typeof password !== "string") {
-    throw new Error("Credenziali non valide.");
+    return {
+      success: false,
+      message: "Credenziali non valide.",
+    };
   }
 
   if (!email || !password) {
-    throw new Error("Email e password sono obbligatorie.");
+    return {
+      success: false,
+      message: "Email e password sono obbligatorie.",
+    };
   }
 
   const { error } = await auth.signIn.email({
@@ -22,7 +36,10 @@ export async function signInWithEmail(formData: FormData) {
   });
 
   if (error) {
-    throw new Error(error.message);
+    return {
+      success: false,
+      message: error.message ?? "Accesso non riuscito.",
+    };
   }
 
   redirect("/dashboard");
