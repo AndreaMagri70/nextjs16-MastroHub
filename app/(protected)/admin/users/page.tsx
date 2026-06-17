@@ -1,5 +1,6 @@
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
+import { StatusBadge } from "@/components/status-badge";
 
 import {
   Table,
@@ -65,7 +66,9 @@ export default async function AdminUsersPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.email}</TableCell>
                   <TableCell>{user.name ?? "-"}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <StatusBadge value={user.role} />
+                  </TableCell>
                   <TableCell>{user.createdAt.toLocaleDateString("it-IT")}</TableCell>
                 </TableRow>
               ))}

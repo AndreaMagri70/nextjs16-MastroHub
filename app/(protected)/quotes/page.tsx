@@ -2,6 +2,8 @@ import { QuoteForm } from "./_components/quote-form";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 
+import { StatusBadge } from "@/components/status-badge";
+
 import { acceptQuote } from "@/actions/quote-actions";
 import { Button } from "@/components/ui/button";
 
@@ -119,7 +121,9 @@ export default async function QuotesPage() {
                     <TableCell className="font-medium">{quote.number}</TableCell>
                     <TableCell>{quote.title}</TableCell>
                     <TableCell>{quote.client.name}</TableCell>
-                    <TableCell>{quote.status}</TableCell>
+                    <TableCell>
+                      <StatusBadge value={quote.status} />
+                    </TableCell>
                     <TableCell className="text-right">
                       {quote.total.toNumber().toLocaleString("it-IT", {
                         style: "currency",

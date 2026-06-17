@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { StatusBadge } from "@/components/status-badge";
+
 export const dynamic = "force-dynamic";
 
 export default async function ConstructionSitesPage() {
@@ -116,7 +118,9 @@ export default async function ConstructionSitesPage() {
                     <TableCell className="font-medium">{site.title}</TableCell>
                     <TableCell>{site.client.name}</TableCell>
                     <TableCell>{site.quote?.number ?? "-"}</TableCell>
-                    <TableCell>{site.status}</TableCell>
+                    <TableCell>
+                      <StatusBadge value={site.status} />
+                    </TableCell>
                     <TableCell>{site.address ?? "-"}</TableCell>
                   </TableRow>
                 ))}
