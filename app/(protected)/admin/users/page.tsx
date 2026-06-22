@@ -2,6 +2,8 @@ import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/status-badge";
 
+import { canAccessAdminUsers } from "@/lib/rbac";
+
 import {
   Table,
   TableBody,
@@ -16,7 +18,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminUsersPage() {
   const currentUser = await requireCurrentUser();
 
-  if (currentUser.role !== "ADMIN") {
+  if (!canAccessAdminUsers(currentUser.role)) {
     return (
       <main className="flex min-h-svh items-center justify-center bg-background p-6">
         <section className="w-full max-w-md rounded-lg border bg-card p-6 text-card-foreground">

@@ -7,14 +7,17 @@ import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { CreateQuoteSchema } from "@/schemas/quote-schema";
 
+import { canCreateQuote } from "@/lib/rbac";
+import { calculateQuoteTotals } from "@/lib/quote-calculations";
+
 export type QuoteActionState = {
   success: boolean;
   message: string;
 };
 
-function toDecimal(value: string) {
-  return new Prisma.Decimal(value);
-}
+// function toDecimal(value: string) {
+//   return new Prisma.Decimal(value);
+// }
 
 function generateQuoteNumber() {
   return `PREV-${Date.now()}`;
@@ -42,7 +45,7 @@ export async function createQuote(
     };
   }
 
-  if (!["ADMIN", "MANAGER", "SALES"].includes(currentUser.role)) {
+  if (!canCreateQuote(currentUser.role)) {
     return {
       success: false,
       message: "Non hai i permessi per creare preventivi.",
@@ -66,13 +69,12 @@ export async function createQuote(
     };
   }
 
-  const quantity = toDecimal(parsed.data.quantity);
-  const unitPrice = toDecimal(parsed.data.unitPrice);
-  const taxRate = toDecimal(parsed.data.taxRate);
-
-  const subtotal = quantity.mul(unitPrice);
-  const taxTotal = subtotal.mul(taxRate).div(100);
-  const total = subtotal.add(taxTotal);
+  const { quantity, unitPrice, taxRate, subtotal, taxTotal, total } =
+  calculateQuoteTotals({
+    quantity: parsed.data.quantity,
+    unitPrice: parsed.data.unitPrice,
+    taxRate: parsed.data.taxRate,
+  });
 
   await prisma.quote.create({
     data: {
@@ -115,7 +117,7 @@ export async function acceptQuote(formData: FormData): Promise<void> {
     return;
   }
 
-  if (!["ADMIN", "MANAGER", "SALES"].includes(currentUser.role)) {
+  if (!canCreateQuote(currentUser.role)) {
     return;
   }
 

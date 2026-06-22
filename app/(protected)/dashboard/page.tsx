@@ -25,7 +25,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Suspense fallback={<StatCardSkeleton />}>
             <ClientsCountCard />
           </Suspense>

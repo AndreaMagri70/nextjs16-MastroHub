@@ -6,6 +6,8 @@ import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { CreateClientSchema } from "@/schemas/client-schema";
 
+import { canCreateClient } from "@/lib/rbac";
+
 export type ClientActionState = {
   success: boolean;
   message: string;
@@ -35,7 +37,7 @@ export async function createClient(
     };
   }
 
-  if (!["ADMIN", "MANAGER", "SALES"].includes(currentUser.role)) {
+  if (!canCreateClient(currentUser.role)) {
     return {
       success: false,
       message: "Non hai i permessi per creare clienti.",

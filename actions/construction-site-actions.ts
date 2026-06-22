@@ -6,6 +6,8 @@ import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { CreateConstructionSiteFromQuoteSchema } from "@/schemas/construction-site-schema";
 
+import { canCreateConstructionSite } from "@/lib/rbac";
+
 export type ConstructionSiteActionState = {
   success: boolean;
   message: string;
@@ -37,7 +39,7 @@ export async function createConstructionSiteFromQuote(
     };
   }
 
-  if (!["ADMIN", "MANAGER"].includes(currentUser.role)) {
+  if (!canCreateConstructionSite(currentUser.role)) {
     return {
       success: false,
       message: "Non hai i permessi per creare cantieri.",
