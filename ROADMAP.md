@@ -241,3 +241,49 @@ Tempo stimato: 1 giorno | Livello di difficoltà: Basso/Medio
     • Database di Produzione creato e migrato.
     • Checkpoint Finale: L'app è accessibile via browser sull'URL pubblico. L'autenticazione funziona e i dati persistono. Hai costruito un ERP professionale. Complimenti!
 
+FASE 9 - Next.js 16 Deep Dive e Qualita' Post-Deploy
+Tempo stimato: 7-14 giorni | Livello di difficolta': Medio/Alto
+1. Obiettivo e Perche' ora
+    - Obiettivo: trasformare MastroHub da app funzionante a progetto didattico avanzato per imparare davvero Next.js 16.
+    - Perche' in questo momento: dopo database, auth, CRUD, dashboard, test e deploy, puoi studiare le parti piu' importanti del framework dentro un'app reale.
+2. Teoria e Concetti da Apprendere
+    - Server Components vs Client Components: capire dove mettere logica, dati, interazione e stato.
+    - Server Actions: usare form progressivi, validazione, redirect, revalidatePath e gestione errori.
+    - Route Handlers: creare endpoint API interni per export, webhook, integrazioni e automazioni.
+    - Caching e rendering: distinguere dati dinamici, dati cacheabili, pagine protette e dashboard con Suspense.
+    - Search params e URL state: filtri, ricerca, paginazione e ordinamento leggibili nell'URL.
+    - Metadata e SEO: title, description, Open Graph e pagine pubbliche indicizzabili.
+    - Performance: ridurre bundle client, evitare client component inutili, misurare con Lighthouse e build analyzer.
+    - Sicurezza: rate limit, validazione input, autorizzazioni lato server, audit delle dipendenze e protezione delle route.
+3. Best Practice & Errori Comuni
+    - Best Practice: ogni accesso ai dati sensibili deve passare dal server e controllare ruolo e permessi.
+    - Best Practice: usa Client Components solo dove servono interazione, browser API o stato locale.
+    - Best Practice: fai in modo che filtri e paginazione siano condivisibili tramite URL.
+    - Errore comune: fidarsi solo della UI per nascondere azioni non autorizzate.
+    - Errore comune: usare useEffect per caricare dati che possono arrivare da Server Components.
+    - Errore comune: creare endpoint API senza validazione Zod e senza controllo RBAC.
+4. Pratica: Feature da Costruire
+    - Ricerca e filtri su Clienti, Preventivi e Cantieri usando searchParams.
+    - Paginazione server-side sulle tabelle principali.
+    - Pagina dettaglio Cliente con preventivi e cantieri collegati.
+    - Pagina dettaglio Preventivo con righe, totale, stato e azioni contestuali.
+    - Export CSV dei preventivi tramite Route Handler.
+    - Audit log base per azioni importanti: creazione cliente, accettazione preventivo, creazione cantiere.
+    - Toast o messaggi persistenti post-redirect usando query param o cookie flash.
+    - Empty state professionali per liste vuote e stati senza dati.
+    - Error boundary e not-found page per sezioni protette.
+    - Metadata dedicate per home, login, register e dashboard.
+5. Esercizi di Consolidamento
+    - Aggiungi ricerca cliente per nome/email e mantieni il valore nell'URL.
+    - Aggiungi paginazione ai preventivi con page e pageSize nei search params.
+    - Crea un Route Handler GET /api/quotes/export che restituisce un CSV solo agli utenti autorizzati.
+    - Scrivi test unitari per i parser dei search params.
+    - Scrivi un test per verificare che un utente senza permesso non possa esportare i preventivi.
+    - Misura la home con Lighthouse e annota 3 miglioramenti possibili.
+6. Checklist e Checkpoint Finale
+    - Le liste principali supportano ricerca o paginazione server-side.
+    - Le pagine dettaglio mostrano relazioni reali dal database.
+    - Gli endpoint API hanno validazione, auth e RBAC.
+    - Le pagine principali hanno metadata sensati.
+    - npm run lint, npm run test e npm run build passano.
+    - Checkpoint Finale: MastroHub non e' solo un gestionale funzionante, ma un laboratorio completo per imparare Next.js 16 con casi reali.
