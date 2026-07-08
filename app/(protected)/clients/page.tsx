@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { Input } from "@/components/ui/input";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { parsePaginationParams } from "@/lib/search-params";
 
 import {
@@ -167,6 +167,11 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
                     <TableCell>{client.type}</TableCell>
                     <TableCell>{client.email ?? "-"}</TableCell>
                     <TableCell>{client.phone ?? "-"}</TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm">
+                        <Link href={`/clients/${client.id}`}>Dettagli</Link>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
 

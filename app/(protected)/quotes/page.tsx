@@ -174,9 +174,25 @@ export default async function QuotesPage({ searchParams }: QuotesPageProps) {
 
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground">Preventivi</p>
-            <h1 className="text-2xl font-semibold">Elenco preventivi</h1>
-            <form action="/quotes" className="flex flex-col gap-2 sm:max-w-md">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Preventivi</p>
+                <h1 className="text-2xl font-semibold">Elenco preventivi</h1>
+              </div>
+
+              {canManageQuotes ? (
+                <Link
+                  href="/api/quotes/export"
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className: "w-fit bg-green-400",
+                  })}
+                >
+                  Esporta CSV
+                </Link>
+              ) : null}
+            </div>            <form action="/quotes" className="flex flex-col gap-2 sm:max-w-md">
               <label htmlFor="query" className="text-sm font-medium">
                 Cerca preventivo
               </label>
@@ -207,7 +223,7 @@ export default async function QuotesPage({ searchParams }: QuotesPageProps) {
             </form>
           </div>
 
-          <div className="overflow-hidden rounded-lg border bg-card text-card-foreground">
+          <div className="hidden overflow-hidden rounded-lg border bg-card text-card-foreground md:block">
             <Table suppressHydrationWarning>
               <TableHeader>
                 <TableRow>
@@ -235,16 +251,28 @@ export default async function QuotesPage({ searchParams }: QuotesPageProps) {
                       })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {["DRAFT", "SENT"].includes(quote.status) ? (
-                        <form action={acceptQuote}>
-                          <input type="hidden" name="quoteId" value={quote.id} />
-                          <Button type="submit" variant="outline" size="sm">
-                            Accetta
-                          </Button>
-                        </form>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <div className="ml-auto grid w-fit grid-cols-2 gap-2">
+                        <Link
+                          href={`/quotes/${quote.id}`}
+                          className={buttonVariants({
+                            variant: "default",
+                            size: "sm",
+                          })}
+                        >
+                          Dettagli
+                        </Link>
+
+                        {["DRAFT", "SENT"].includes(quote.status) ? (
+                          <form action={acceptQuote}>
+                            <input type="hidden" name="quoteId" value={quote.id} />
+                            <Button type="submit" variant="outline" size="sm" className="w-full">
+                              Accetta
+                            </Button>
+                          </form>
+                        ) : (
+                          <span aria-hidden="true" />
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -258,6 +286,78 @@ export default async function QuotesPage({ searchParams }: QuotesPageProps) {
                 ) : null}
               </TableBody>
             </Table>
+          </div>
+
+          <div className="grid gap-3 md:hidden">
+            {quotes.map((quote) => (
+              <div
+                key={quote.id}
+                className="rounded-lg border bg-card p-4 text-card-foreground"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium">{quote.number}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {quote.title}
+                    </p>
+                  </div>
+                  <StatusBadge value={quote.status} />
+                </div>
+
+                <div className="mt-4 grid gap-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Cliente</span>
+                    <span className="text-right font-medium">
+                      {quote.client.name}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Totale</span>
+                    <span className="font-medium">
+                      {quote.total.toNumber().toLocaleString("it-IT", {
+                        style: "currency",
+                        currency: "EUR",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Link
+                    href={`/quotes/${quote.id}`}
+                    className={buttonVariants({
+                      variant: "default",
+                      size: "sm",
+                    })}
+                  >
+                    Dettagli
+                  </Link>
+
+                  {["DRAFT", "SENT"].includes(quote.status) ? (
+                    <form action={acceptQuote}>
+                      <input type="hidden" name="quoteId" value={quote.id} />
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        Accetta
+                      </Button>
+                    </form>
+                  ) : (
+                    <span aria-hidden="true" />
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {quotes.length === 0 ? (
+              <div className="rounded-lg border bg-card p-6 text-center text-sm text-muted-foreground">
+                Nessun preventivo trovato.
+              </div>
+            ) : null}
           </div>
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">

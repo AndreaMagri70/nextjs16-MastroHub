@@ -1,0 +1,9 @@
+⚠ Port 3000 is in use by process 12840, using available port 3001 instead.
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          12840
+- Dir:          C:\Users\andre\AppData\Local\Programs\JS\nextjs16-MastroHub
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 12840 /F to stop it.

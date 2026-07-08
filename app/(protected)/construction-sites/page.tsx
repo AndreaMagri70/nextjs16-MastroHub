@@ -62,10 +62,10 @@ export default async function ConstructionSitesPage({
   });
 
   const siteWhere = {
-  deletedAt: null,
+    deletedAt: null,
 
-  ...(searchQuery
-    ? {
+    ...(searchQuery
+      ? {
         OR: [
           {
             title: {
@@ -97,68 +97,68 @@ export default async function ConstructionSitesPage({
           },
         ],
       }
-    : {}),
+      : {}),
 
-  ...(currentUser.role === "TECHNICIAN"
-    ? {
+    ...(currentUser.role === "TECHNICIAN"
+      ? {
         assignments: {
           some: {
             userId: currentUser.id,
           },
         },
       }
-    : {}),
-};
+      : {}),
+  };
 
   const [sites, totalSites] = await Promise.all([
-  prisma.constructionSite.findMany({
-    where: siteWhere,
-    orderBy: {
-      createdAt: "desc",
-    },
-    skip,
-    take: pageSize,
-    select: {
-      id: true,
-      title: true,
-      status: true,
-      address: true,
-      client: {
-        select: {
-          name: true,
+    prisma.constructionSite.findMany({
+      where: siteWhere,
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: pageSize,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        address: true,
+        client: {
+          select: {
+            name: true,
+          },
+        },
+        quote: {
+          select: {
+            number: true,
+          },
         },
       },
-      quote: {
-        select: {
-          number: true,
-        },
-      },
-    },
-  }),
-  prisma.constructionSite.count({
-    where: siteWhere,
-  }),
-]);
+    }),
+    prisma.constructionSite.count({
+      where: siteWhere,
+    }),
+  ]);
 
-const totalPages = Math.max(Math.ceil(totalSites / pageSize), 1);
+  const totalPages = Math.max(Math.ceil(totalSites / pageSize), 1);
 
-const getConstructionSitesPageHref = (targetPage: number) => {
-  const params = new URLSearchParams();
+  const getConstructionSitesPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
 
-  if (searchQuery) {
-    params.set("query", searchQuery);
-  }
+    if (searchQuery) {
+      params.set("query", searchQuery);
+    }
 
-  if (targetPage > 1) {
-    params.set("page", String(targetPage));
-  }
+    if (targetPage > 1) {
+      params.set("page", String(targetPage));
+    }
 
-  const queryString = params.toString();
+    const queryString = params.toString();
 
-  return queryString
-    ? `/construction-sites?${queryString}`
-    : "/construction-sites";
-};
+    return queryString
+      ? `/construction-sites?${queryString}`
+      : "/construction-sites";
+  };
 
   return (
     <main className="min-h-svh bg-background p-6">
@@ -188,40 +188,40 @@ const getConstructionSitesPageHref = (targetPage: number) => {
           </div>
 
           <form
-  action="/construction-sites"
-  className="flex flex-col gap-2 sm:max-w-md"
->
-  <label htmlFor="query" className="text-sm font-medium">
-    Cerca cantiere
-  </label>
+            action="/construction-sites"
+            className="flex flex-col gap-2 sm:max-w-md"
+          >
+            <label htmlFor="query" className="text-sm font-medium">
+              Cerca cantiere
+            </label>
 
-  <div className="flex gap-2">
-    <Input
-      key={searchQuery ?? "empty-search"}
-      id="query"
-      name="query"
-      type="search"
-      placeholder="Titolo, cliente, indirizzo o preventivo"
-      defaultValue={searchQuery ?? ""}
-    />
+            <div className="flex gap-2">
+              <Input
+                key={searchQuery ?? "empty-search"}
+                id="query"
+                name="query"
+                type="search"
+                placeholder="Titolo, cliente, indirizzo o preventivo"
+                defaultValue={searchQuery ?? ""}
+              />
 
-    {searchQuery ? (
-      <Link
-        href="/construction-sites"
-        className={buttonVariants({
-          variant: "secondary",
-          size: "default",
-          className: "shrink-0",
-        })}
-      >
-        Pulisci
-      </Link>
-    ) : null}
-  </div>
-  
-</form>
+              {searchQuery ? (
+                <Link
+                  href="/construction-sites"
+                  className={buttonVariants({
+                    variant: "secondary",
+                    size: "default",
+                    className: "shrink-0",
+                  })}
+                >
+                  Pulisci
+                </Link>
+              ) : null}
+            </div>
 
-          <div className="overflow-hidden rounded-lg border bg-card text-card-foreground">
+          </form>
+
+          <div className="hidden overflow-hidden rounded-lg border bg-card text-card-foreground md:block">
             <Table suppressHydrationWarning>
               <TableHeader>
                 <TableRow>
@@ -230,6 +230,7 @@ const getConstructionSitesPageHref = (targetPage: number) => {
                   <TableHead>Preventivo</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Indirizzo</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -242,12 +243,23 @@ const getConstructionSitesPageHref = (targetPage: number) => {
                       <StatusBadge value={site.status} />
                     </TableCell>
                     <TableCell>{site.address ?? "-"}</TableCell>
+                    <TableCell className="text-right">
+                      <Link
+                        href={`/construction-sites/${site.id}`}
+                        className={buttonVariants({
+                          variant: "default",
+                          size: "sm",
+                        })}
+                      >
+                        Dettagli
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))}
 
                 {sites.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                       Nessun cantiere trovato.
                     </TableCell>
                   </TableRow>
@@ -255,37 +267,90 @@ const getConstructionSitesPageHref = (targetPage: number) => {
               </TableBody>
             </Table>
           </div>
+
+          <div className="grid gap-3 md:hidden">
+            {sites.map((site) => (
+              <div
+                key={site.id}
+                className="rounded-lg border bg-card p-4 text-card-foreground"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium">{site.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {site.client.name}
+                    </p>
+                  </div>
+                  <StatusBadge value={site.status} />
+                </div>
+
+                <div className="mt-4 grid gap-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Preventivo</span>
+                    <span className="text-right font-medium">
+                      {site.quote?.number ?? "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Indirizzo</span>
+                    <span className="text-right font-medium">
+                      {site.address ?? "-"}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex justify-center">
+                    <Link
+                      href={`/construction-sites/${site.id}`}
+                      className={buttonVariants({
+                        variant: "default",
+                        size: "sm",
+                        className: "w-1/2",
+                      })}
+                    >
+                      Dettagli
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {sites.length === 0 ? (
+              <div className="rounded-lg border bg-card p-6 text-center text-sm text-muted-foreground">
+                Nessun cantiere trovato.
+              </div>
+            ) : null}
+          </div>
           <div className="flex items-center justify-between gap-4">
-  <p className="text-sm text-muted-foreground">
-    Pagina {currentPage} di {totalPages}
-  </p>
+            <p className="text-sm text-muted-foreground">
+              Pagina {currentPage} di {totalPages}
+            </p>
 
-  <div className="flex gap-2">
-    {currentPage > 1 ? (
-      <Link
-        href={getConstructionSitesPageHref(currentPage - 1)}
-        className={buttonVariants({
-          variant: "outline",
-          size: "sm",
-        })}
-      >
-        Precedente
-      </Link>
-    ) : null}
+            <div className="flex gap-2">
+              {currentPage > 1 ? (
+                <Link
+                  href={getConstructionSitesPageHref(currentPage - 1)}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                  })}
+                >
+                  Precedente
+                </Link>
+              ) : null}
 
-    {currentPage < totalPages ? (
-      <Link
-        href={getConstructionSitesPageHref(currentPage + 1)}
-        className={buttonVariants({
-          variant: "outline",
-          size: "sm",
-        })}
-      >
-        Successiva
-      </Link>
-    ) : null}
-  </div>
-</div>
+              {currentPage < totalPages ? (
+                <Link
+                  href={getConstructionSitesPageHref(currentPage + 1)}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                  })}
+                >
+                  Successiva
+                </Link>
+              ) : null}
+            </div>
+          </div>
         </div>
       </section>
     </main>
